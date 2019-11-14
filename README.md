@@ -8,7 +8,7 @@
 百度谷歌翻译  
 钉钉机器人  
 微信公众号和微信个人  
-标准日志打印  
+标准后台日志打印  
 容器打包和部署  
 支持配置文件  
 数据库保存数据  
@@ -19,4 +19,4 @@
 支持twitter  
 ### Special thanks to
 https://github.com/bisguzar/twitter-scraper  
-https://github.com/taspinar/twitterscraper  
+https://github.com/taspinar/twitterscraper   
