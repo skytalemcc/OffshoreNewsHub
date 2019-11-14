@@ -3,8 +3,12 @@ from requests_html import HTMLSession, HTML
 from datetime import datetime
 from urllib.parse import quote
 from lxml.etree import ParserError
+#import mechanicalsoup
 
 session = HTMLSession()
+
+#browser = mechanicalsoup.StatefulBrowser()
+#browser.addheaders = [('User-agent', 'Firefox')]
 
 def get_tweets(query, pages=25):
     """Gets tweets for a given user, via the Twitter frontend API."""
