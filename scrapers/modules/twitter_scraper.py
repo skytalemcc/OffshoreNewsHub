@@ -3,13 +3,35 @@ from requests_html import HTMLSession, HTML
 from datetime import datetime
 from urllib.parse import quote
 from lxml.etree import ParserError
-#import mechanicalsoup
-
+from .tw_logger import logger
+from itertools import cycle
+import mechanicalsoup
+import requests
+from bs4 import BeautifulSoup
+from random import choice
 session = HTMLSession()
 
-#browser = mechanicalsoup.StatefulBrowser()
-#browser.addheaders = [('User-agent', 'Firefox')]
+browser = mechanicalsoup.StatefulBrowser()
+browser.addheaders = [('User-agent', 'Firefox')]
+PROXY_URL = 'https://free-proxy-list.net/'
 
+def get_proxies():
+    response = requests.get(PROXY_URL)
+    soup = BeautifulSoup(response.text, 'lxml')
+    table = soup.find('table',id='proxylisttable')
+    list_tr = table.find_all('tr')
+    list_td = [elem.find_all('td') for elem in list_tr]
+    list_td = list(filter(None, list_td))
+    list_ip = [elem[0].text for elem in list_td]
+    list_ports = [elem[1].text for elem in list_td]
+    list_proxies = [':'.join(elem) for elem in list(zip(list_ip, list_ports))]
+    return list_proxies 
+
+proxies = get_proxies()
+proxy_pool = cycle(proxies)
+print(proxies)
+print(type(proxies))
+print(choice(proxies))
 def get_tweets(query, pages=25):
     """Gets tweets for a given user, via the Twitter frontend API."""
 
@@ -31,7 +53,10 @@ def get_tweets(query, pages=25):
     }
 
     def gen_tweets(pages):
-        r = session.get(url, headers=headers)
+        #proxy = next(proxy_pool)
+        proxy = choice(proxies)
+        logger.info('Using proxy {}'.format(proxy))
+        r = session.get(url, headers=headers, proxies={"http": proxy}, timeout=60)
 
         while pages > 0:
             try:
@@ -128,7 +153,7 @@ def get_tweets(query, pages=25):
                     tweet['text'] = re.sub(r'\Spic\.twitter', ' pic.twitter', tweet['text'], 1)
                     yield tweet
 
-            r = session.get(url, params={'max_position': last_tweet}, headers=headers)
+            r = session.get(url, params={'max_position': last_tweet}, headers=headers,proxies={"http": proxy}, timeout=60)
             pages += -1
 
     yield from gen_tweets(pages)
